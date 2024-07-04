@@ -66,12 +66,19 @@
         @PostMapping("/addBankItem")
         public ResponseEntity<String> addBankItem(@RequestHeader("sessionId") Long sessionId, @RequestBody BankItem bankItem) {
             LoginSession loginSession = loginSessionService.findById(sessionId);
+            BankItem ExistingbankItem=bankService.getByItemId(loginSession.getUserId());
             if (loginSession != null) {
                 Optional<User> user = Optional.ofNullable(userService.getUserById(loginSession.getUserId()));
                 if (user.isPresent()) {
-                    // bankItem.setUser(user.get()); // Uncomment if BankItem has a User field
-                    bankService.addBank(bankItem);
-                    return ResponseEntity.status(HttpStatus.CREATED).body("BankItem successfully added");
+                   if(ExistingbankItem!=null)
+                   {
+                       return ResponseEntity.status(HttpStatus.ALREADY_REPORTED).body("BankItem is Already present");
+                   }
+                   else {
+                       // bankItem.setUser(user.get()); // Uncomment if BankItem has a User field
+                       bankService.addBank(bankItem);
+                       return ResponseEntity.status(HttpStatus.CREATED).body("BankItem successfully added");
+                   }
                 } else {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not found");
                 }
